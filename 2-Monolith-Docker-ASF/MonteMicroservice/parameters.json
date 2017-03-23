@@ -1,0 +1,67 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "value": "montecluster"
+        },
+        "clusterLocation": {
+            "value": "westus"
+        },
+        "computeLocation": {
+            "value": "westus"
+        },
+        "adminUserName": {
+            "value": "nmrose"
+        },
+        "adminPassword": {
+            "value": "azureIsAw3s0me!"
+        },
+        "nicName": {
+            "value": "NIC-montecluster"
+        },
+        
+        "publicIPAddressName": {
+            "value": "montecluster-PubIP"
+        },
+        "vmStorageAccountName": {
+            "value": "sfvmmontecluster8280"
+        },
+        "dnsName": {
+            "value": "montecluster"
+        },
+        "virtualNetworkName": {
+            "value": "VNet-montecluster"
+        },
+        "lbName": {
+            "value": "LB-montecluster"
+        },
+        "lbIPName": {
+            "value": "LBIP-montecluster"
+        },
+        "applicationDiagnosticsStorageAccountName": {
+            "value": "sfdgmontecluster1897"
+        },
+        "supportLogStorageAccountName": {
+            "value": "sflogsmontecluster7221"
+        },
+        "nt0ephemeralStartPort": {
+            "value": 49152
+        },
+        "nt0ephemeralEndPort": {
+            "value": 65534
+        },
+        "nt0applicationStartPort": {
+            "value": 20000
+        },
+        "nt0applicationEndPort": {
+            "value": 30000
+        },
+        "nt0fabricTcpGatewayPort": {
+            "value": 19000
+        },
+        "nt0fabricHttpGatewayPort": {
+            "value": 19080
+        }
+    }
+}

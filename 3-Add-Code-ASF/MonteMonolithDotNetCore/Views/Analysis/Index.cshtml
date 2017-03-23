@@ -1,0 +1,30 @@
+﻿@model MonteMonolith.Models.ChartViewModel
+
+<div style="width: 600px">
+    <canvas id="canvas"></canvas>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+<script>
+var ctx = document.getElementById("canvas");
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: @Model.Labels,
+        datasets: [{
+            label: 'Simulation Totals',
+            data: @Model.Totals,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+</script>
