@@ -19,3 +19,12 @@ ASP.NET core monolith, SimulationScheduler added as a new Microservice
 
 ### Stage 4
 ASP.NET core monolith, Simulation Scheduler and simulate feature from monolith decomposed into it’s own service
+
+### Pre-requisites
+* Azure SDK
+*	Service Fabric SDK 2.4
+* .NET Core 1.1
+*	Azure Blob Storage account OR Azure Storage Emulator running
+
+### Things to know
+* Visual Studio should be run as Administrator when you want to deploy to the cluster on your dev machine
