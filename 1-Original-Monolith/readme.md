@@ -122,5 +122,8 @@ http://localhost:59764/api/simulation/simulate/2/11,12/12.5,13/17,15
 
 <img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img2.PNG" width="700">
 
+We can then click the Chart menu item at the top of the page and see the result was stored:
 
-For more information about Monte Carlo Simulation check out this [resource] (http://people.revoledu.com/kardi/tutorial/Simulation/index.html)
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/montemonolith.jpg.png" width="700">
+
+For more information about Monte Carlo Simulation check out this [resource](http://people.revoledu.com/kardi/tutorial/Simulation/index.html)
