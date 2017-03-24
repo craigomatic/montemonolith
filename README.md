@@ -28,3 +28,4 @@ ASP.NET core monolith, Simulation Scheduler and simulate feature from monolith d
 
 ### Things to know
 * Visual Studio should be run as Administrator when you want to deploy to the cluster on your dev machine
+* Service Fabric likes services to target x64, you will most likely get an error if Any CPU is selected
