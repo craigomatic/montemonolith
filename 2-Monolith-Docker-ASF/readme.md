@@ -226,15 +226,174 @@ Now that we have our Container image in our Docker Hub Repo, we will now deploy 
 
 > At the time of this write-up, Windows 10 image VMs or local machines are unable to support Guest Containers in the Service Fabric Runtime.
 
-Navigate to this directory \*2-Monolith-Docker-ASF\MonteMicroservice
+Navigate to this directory *\2-Monolith-Docker-ASF\MonteMicroservice
+
+We have created an Azure Resource Manager Template for you to deploy and create a Service Fabric Cluster that is compatible with Containers. Here are some things to note:
+- We have selected a specific VM Image for the Cluster to run that allows you to enable containerization. This is our VMImage Sku added in the parameters.json file - "2016-Datacenter-with-Containers"
+ - The cluster also configures a specific Network Interface setting that allows the cluster to communicate across nodes with containers. This is added in the template.json - "NicPrefixOverride": "10.0.0"
+ - We are deploying an **Unsecure Cluster** for simplicity. For a Secure Cluster that uses Certificates follow [this tutorial](https://github.com/NathanielRose/Azure-Service-Fabric-Lap-Around-Lab). For more examples of Secure Clusters review this [document](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-creation-via-arm). 
 
 Inside the directory open the parameters.json folder.
 
-Switch out the following two parameters with others of your choosing
-``` json
+Switch out the following two parameters with values of your choosing
+```json
+
  "adminUserName": {
             "value": "nmrose"
         },
  "adminPassword": {
             "value": "azureIsAw3s0me!"
-            ```
+            
+```
+Open a PowerShell window from the directory.
+
+Sign in to your Azure account:
+
+``` PowerShell
+Login-AzureRmAccount
+```
+
+Select your Subscription.
+``` PowerShell
+Get-AzureRmSubscription
+Set-AzureRmContext -SubscriptionId <guid>
+```
+
+Create a new Resource Group to Deploy your cluster components to.
+``` PowerShell
+New-AzureRmResourceGroup -Name ExampleGroup -Location "West US"
+```
+
+Now Deploy your resoucre template to the Resource Group you just created.
+``` PowerShell
+New-AzureRmResourceGroupDeployment -ResourceGroupName "ExampleGroup" -TemplateFile .\template.json -TemplateParameterFile .\parameters.json
+```
+
+> This may take about 5 - 10 minutes to deploy all the resources. Once Deployed you can see that the deployment provisioned 5 VMs in a Virtual Machine Scale Set, Storage Accounts, a Load Balancer, a public IP address and a Cluster Manager.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img9.PNG" width="700">
+
+
+
+## Deploy Guest Container Staeless Service to Azure Service Fabric
+
+Now that we havve our cluster deployed and our docker image ready in Docker Hub, we can now deploy our application to the cluster.
+
+Open **Visual Studio 2015**
+
+Select **File** --> **New** --> **Project**
+
+Select the **Service Fabric Application** template under the Cloud tab and name your application.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img10.PNG" width="700">
+
+Select the **Guest Container** Template and enter your image name based on your docker hub image. For our example the namespace was <naros> and the image name was mvcmontedocker. You can find this inside the Service Manifest of the example we includedin this folder.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img11.PNG" width="700">
+
+> Note - Guest Container Services only run on Windows Server 2016. If you are running this on a local machine with Windows 10. you must use the Azure cluster we deployed to debug.
+
+Inside the Application Manifest we set our endpoint.
+
+``` xml
+
+<ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="Guest1Pkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+    <EnvironmentOverrides CodePackageRef="Code">
+
+      <!-- <EnvironmentVariable Name="Guest1Pkg" Value="Container.Application/Guest1pkg"/> -->
+
+      <EnvironmentVariable Name="HttpGatewayPort" Value="8000"/>
+
+      <EnvironmentVariable Name="IsContainer" Value="true"/>
+
+    </EnvironmentOverrides>
+   <Policies>
+
+      <ContainerHostPolicies CodePackageRef="Code">
+
+        <PortBinding ContainerPort="8000" EndpointRef="MonteDockerEndpoint"/>
+
+      </ContainerHostPolicies>
+
+    </Policies>
+    
+  </ServiceManifestImport>
+
+  ```
+
+  And Inside the Service Manifest we will expose port 8000 for our ASP.NET application to communicate on.
+
+``` xml
+
+   <EnvironmentVariables>
+  <!--    <EnvironmentVariable Name="VariableName" Value="VariableValue"/> -->
+      <EnvironmentVariable Name="HttpGatewayPort" Value=""/>
+      <EnvironmentVariable Name="IsContainer" Value=""/>
+    </EnvironmentVariables>
+    
+  </CodePackage>
+
+  <!-- Config package is the contents of the Config directoy under PackageRoot that contains an 
+       independently-updateable and versioned set of custom configuration settings for your service. -->
+  <ConfigPackage Name="Config" Version="1.0.0" />
+
+  <Resources>
+    <Endpoints>
+      <!-- This endpoint is used by the communication listener to obtain the port on which to 
+           listen. Please note that if your service is partitioned, this port is shared with 
+           replicas of different partitions that are placed in your code. -->
+      <Endpoint Name="MonteDockerEndpoint" Protocol="http" Port="8000"  UriScheme = "http"  Type="Input" />
+    </Endpoints>
+
+```
+
+Refer to our MonteService.sln for support included in this folder.
+
+Now we can publish the Application to our Azure Cluster.
+
+**Right click** the Project in Solution Explorer and Select **Publish**.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img12.png" width="700">
+
+Select **Cloud.xml** as your publish file.
+
+Sign into your Azure Account and select the Service Fabric Cluster we deployed in an earlier step.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img13.PNG" width="700">
+
+Once Deployed Navigate to the Azure Portal and then to your Service Fabric Cluster.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img14.PNG" width="700">
+
+
+We now need to create a load balancing rule that exposes port 8000 publically.
+
+Select your resource group from the Service Fabric Cluster Overview.
+
+Select the Load Balncer from the resource list
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img15.PNG" width="700">
+
+In the configurations list for the Load Balancer, Select **Load Balancing Rules** and then Select **Add+**
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img16.PNG" width="700">
+
+Name your Load Balancing Rule, Choose the Protocol and specify the port. Click **Save** at the top when finished.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img17.PNG" width="500">
+
+Navigate back to your Service Fabric Cluster in the Portal and Open the Service Fabric Explorer. You can also enter the URL for it. Our Service Fabric Explorer URL for the cluster is: http://montecluster.westus.cloudapp.azure.com:19080/Explorer
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img18.PNG" width="700">
+
+Here you will see the health of our application and the status of our nodes.
+
+If we navigate to port 8000 now we should hit our Home Page to the ASP.NET application.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img19.PNG" width="700">
+
+Finally if we test our API, we will get a JSON response.
+
+<img src="https://rtwrt.blob.core.windows.net/post2-monteasf/img20.PNG" width="700">
