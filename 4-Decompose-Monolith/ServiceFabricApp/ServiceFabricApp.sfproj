@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonteMonolith.NewFeature\MonteMonolith.NewFeature.csproj" />
+    <ProjectReference Include="..\MonteMonolith.SimulateService\MonteMonolith.SimulateService.csproj" />
     <ProjectReference Include="..\MonteMonolithDotNetCore\MonteMonolithDotNetCore.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
